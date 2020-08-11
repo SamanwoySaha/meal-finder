@@ -15,57 +15,67 @@ function searchMeal(e) {
     // Get search term 
     const term = search.value;
 
-    if(term.trim()) {
+    if (term.trim()) {
         fetch(`https://www.themealdb.com/api/json/v1/1/search.php?s=${term}`)
-        .then(res => res.json())
-        .then(data => {
-            resultHeading.innerHTML = `<h2>Search results for ${term}:</h2>`;
+            .then(res => res.json())
+            .then(data => {
+                resultHeading.innerHTML = `<h2>Search results for ${term}:</h2>`;
 
-            if(data.meals === null) {
-                resultHeading.innerHTML = `<p>There are no search results. Try again!</p>`;
-            }
-            else {
-                mealsEl.innerHTML = data.meals.map(meal => `
-                    <div class="meal">
-                        <img src="${meal.strMealThumb}" alt="${meal.strMeal}"/>
-                        <div class="meal-info" data-mealId="${meal.idMeal}">
-                            <h3>${meal.strMeal}</h3>                   
+                if (data.meals === null) {
+                    resultHeading.innerHTML = `<p>There are no search results. Try again!</p>`;
+                } else {
+                    mealsEl.innerHTML = data.meals.map(meal => `
+                        <div class="meal">
+                            <img src="${meal.strMealThumb}" alt="${meal.strMeal}"/>
+                            <div class="meal-info" data-mealId="${meal.idMeal}">
+                                <h3>${meal.strMeal}</h3>                   
+                            </div>
                         </div>
-                    </div>
-                `)
-                .join('');
-            }
-        });
+                    `).join('');
+                }
+            });
 
         // Clear search text
         search.value = '';
-    }
-    else {
+    } else {
         alert('Please enter a search term');
     }
-    
 }
 
 // fetch meal by ID 
 function getMealById(mealId) {
     fetch(`https://www.themealdb.com/api/json/v1/1/lookup.php?i=${mealId}`)
-    .then(res => res.json())
-    .then(data => {
-        const meal = data.meals[0];
+        .then(res => res.json())
+        .then(data => {
+            const meal = data.meals[0];
 
-        addMealToDOM(meal);
-    });
+            addMealToDOM(meal);
+        });
+}
+
+// fetch random meal from API
+function getRandomMeal() {
+    // Clear meals and heading
+    mealsEl.innerHTML = '';
+    resultHeading.innerHTML = '';
+
+    fetch('https://www.themealdb.com/api/json/v1/1/random.php')
+        .then(res => res.json())
+        .then(data => {
+            const meal = data.meals[0];
+
+            addMealToDOM(meal);
+        });
 }
 
 // Add meal to DOM  
 function addMealToDOM(meal) {
     const ingredients = [];
 
-    for(let i = 1; i <= 20; i++) {
-        if(meal[`strIngredient${i}`]) {
+    for (let i = 1; i <= 20; i++) {
+        if (meal[`strIngredient${i}`]) {
             ingredients.push(`${meal[`strIngredient${i}`]} - ${meal[`strMeasure${i}`]}`);
-        }
-        else {
+        } else {
             break;
         }
     }
@@ -91,10 +101,11 @@ function addMealToDOM(meal) {
 
 // Event Listeners
 submit.addEventListener('submit', searchMeal);
+random.addEventListener('click', getRandomMeal);
 
 mealsEl.addEventListener('click', e => {
     const mealInfo = e.path.find(item => {
-        if(item.classList) {
+        if (item.classList) {
             return item.classList.contains('meal-info');
         } else {
             return false;
